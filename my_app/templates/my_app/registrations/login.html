@@ -1,0 +1,65 @@
+{% extends 'my_app/base.html' %}
+
+
+{% load static %}
+
+{% block title %}Log In{% endblock %}
+
+
+{% block content %}
+<div class="max-w-lg flex  mx-auto flex-wrap p-6">
+    <div class="w-full bg-gray-100 p-6 rounded-xl">
+        <h1 class="mb-6  text-2xl">Log In</h1>
+
+        <form action="." method="post" class="space-y-3">
+            {% csrf_token %}
+            <div class="">
+                <label >username</label>
+                <input class="w-full mt-2 py-4 px-7 bg-white rounded-xl" name="username" type="text">
+            </div>
+
+            <div class="">
+                <label >Password</label>
+                <input class="w-full mt-2 py-4 px-7 bg-white rounded-xl" name="password" type="password">
+            </div>
+
+
+            {% if form.errors %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                    <div class="p-6 bg-red-300 rounded-xl">
+                        <p>{{ error|escape }}</p>
+                    </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {% for error in form.non_field_errors %}
+                    <div class="p-6 bg-red-300 rounded-xl">
+                        <p>{{ error|escape }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+
+            <div>
+                <button type="submit" class="py-4 px-6 bg-indigo-500 text-white mt-6 rounded-xl hover:bg-purple-700">Log In</button>
+            </div>
+
+        </form>
+    </div>
+
+
+</div>
+
+
+{% endblock content %}
+
+
+
+
+
+
+
+
+
+

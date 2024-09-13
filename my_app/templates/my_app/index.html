@@ -1,0 +1,40 @@
+{% extends 'my_app/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!--Header-->
+<header class="px-6 py-20 lg:px-20 bg-purple-500 ">
+    <div class="max-w-3xl mx-auto text-center">
+        <h1 class="text-3xl  lg:text-5xl text-white mb-5">Welcome to my shop!</h1>
+
+        <p class="mb-10 text-white">Get everything you need for the summer 10% OFF!!!</p>
+
+
+        <a href="{% url 'my_app:shop' %}" class="bg-white rounded-xl inline-block px-8 py-4 text-purple-500 hover:bg-gray-200">Get offer!</a href="#">
+    </div>
+</header>
+
+
+
+<div class="text-center mt-5">
+<h2 class="font-semibold text-2xl">My Products</h2><br>
+</div>
+<div class="max-w-6xl py-5 mx-auto px-5 xl:px-0">
+    <div class="products flex items-center flex-wrap">
+        <!--Products card-->
+        {% for product in products %}
+            {% include 'product/partials/product_list_item.html' %}
+        {% endfor %}
+
+        
+        <!--End of product card-->
+    
+
+    </div>
+</div>
+
+{% endblock content %}
+
+
+

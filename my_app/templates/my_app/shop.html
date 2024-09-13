@@ -1,0 +1,66 @@
+{% extends 'my_app/base.html' %}
+
+{% block title %}Shop{% endblock %}
+
+
+{% block content %}
+
+
+<div class="text-center mt-5">
+    <h2 class="font-semibold text-2xl">My Products</h2><br>
+</div>
+
+
+<div class="max-w-6xl flex flex-wrap py-5 mx-auto items-start px-6 xl:px-0">
+
+    <div class="filters w-full lg:w-1/4 p-10">
+        <h3 class="mb-3 text-xl  uppercase">Search</h3>
+    
+        <form  class="flex" action="." method="get">
+            <input type="text" name="query" class="px-3 py-2">
+            <button class="bg-purple-500 text-white font-semibold px-3 py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 15.75-2.489-2.489m0 0a3.375 3.375 0 1 0-4.773-4.773 3.375 3.375 0 0 0 4.774 4.774ZM21 12a9 9 0 1   1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            </button>
+        </form>
+
+        <h3 class="mt-6 mb-3 text-xl  uppercase">Categories</h3>
+
+            <ul class="space-y-2">
+                <li><a href="{% url 'my_app:shop'%}" class="{% if not active_category %} text-purple-500 {% else%} text-gray-500 {% endif %}">All Categories</a></li>
+
+                {% for category in categories %}
+                    <li><a href="{% url 'my_app:shop'%}?category={{ category.slug }}" class="{% if  category.slug == active_category %} text-purple-500 {%else%} text-gray-500 {% endif %}">{{ category.name }}</a></li>
+                {% endfor %}
+
+            </ul>
+           
+        
+    </div>
+
+    <div class="products w-full lg:w-3/4 flex items-center flex-wrap">
+        <!--Products card-->
+        {% for product in products %}
+            {% include 'product/partials/product_list_item.html' %}
+        {% endfor %}
+
+        
+        <!--End of product card-->
+    
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+{% endblock content %}
+
+

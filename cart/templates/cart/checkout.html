@@ -1,0 +1,180 @@
+{% extends 'my_app/base.html' %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-start py-6 px-6 xl:px-0 space-y-6 lg:space-y-0 lg:space-x-6">
+    <!-- Form container with lg:w-3/4 to control width on larger screens -->
+    <div class="products w-full lg:w-3/4">
+        <h1 class="mb-5 text-3xl">Checkout</h1>
+
+        <div class="w-full pr-6">
+            <div class="mb-6 p-6 bg-gray-100 rounded-xl">
+                <h2 class="mb-5 uppercase text-lg">Shipping information</h2>
+
+                <div class="flex space-x-6">
+                    <div class="w-1/2 mb-4">
+                        <label class="inline-block mb-2">First name</label>
+                        <input name="first_name" type="text" class="w-full p-5 rounded-xl" value="{{ request.user.first_name }}">
+                    </div>
+
+                    <div class="w-1/2 mb-4">
+                        <label class="inline-block mb-2">Last name</label>
+                        <input name="last_name" type="text" class="w-full p-5 rounded-xl" value="{{ request.user.last_name }}">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="inline-block mb-2">Address</label>
+                    <input name="address" type="text" class="w-full p-5 rounded-xl">
+                </div>
+
+                <div class="flex space-x-6">
+                    <div class="w-1/2 mb-4">
+                        <label class="inline-block mb-2">Zip code</label>
+                        <input name="zipcode" type="text" class="w-full p-5 rounded-xl">
+                    </div>
+
+                    <div class="w-1/2 mb-4">
+                        <label class="inline-block mb-2">City/Place</label>
+                        <input name="place" type="text" class="w-full p-5 rounded-xl">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6 p-6 bg-gray-100 rounded-xl">
+                <h2 class="mb-5 uppercase text-lg">Contact information</h2>
+
+                <div class="mb-4">
+                    <label class="inline-block mb-2">Email</label>
+                    <input name="email" type="email" class="w-full p-5 rounded-xl" value="{{ request.user.email }}">
+                </div>
+
+                <div class="mb-4">
+                    <label class="inline-block mb-2">Phone</label>
+                    <input name="phone" type="phone" class="w-full p-5 rounded-xl">
+                </div>
+            </div>
+
+            <div class="mb-6 p-6 bg-gray-100 rounded-xl" id="errors">
+           
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary container with lg:w-1/4 to control width on larger screens -->
+    <div class="summary w-full lg:w-1/4 p-6 bg-gray-100 rounded-xl">
+        <h2 class="uppercase text-lg mb-5">Summary</h2>
+
+        <div class="mb-6 flex justify-between">
+            <span class="font-semibold">Total</span>
+            <span>${{ cart.get_total_cost|floatformat:2 }}</span>
+        </div>
+
+        <button
+            onclick="buy(event)"
+            class="inline-block px-8 py-4 rounded-xl bg-purple-500 hover:bg-purple-700 text-white"
+        >
+            Confirm checkout
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="application/javascript" src="https://js.stripe.com/v3/"></script>
+<script>
+    let el = document.querySelector('#errors')
+
+    function validateForm(data) {
+        let errors = []
+
+        // Validations for form fields
+        if (data.first_name === '') {
+            errors.push('First name is empty')
+        }
+        if (data.last_name === '') {
+            errors.push('Last name is empty')
+        }
+        if (data.email === '') {
+            errors.push('Email is empty')
+        }
+        if (data.phone === '') {
+            errors.push('Phone is empty')
+        }
+        if (data.address === '') {
+            errors.push('Address is empty')
+        }
+        if (data.zip_code === '') {
+            errors.push('Zipcode is empty')
+        }
+        if (data.place === '') {
+            errors.push('Place is empty')
+        }
+
+        if (errors.length > 0) {
+            let html = '<ul>'
+            errors.forEach((error) => {
+                html += '<li>' + error + '</li>'
+            })
+            el.innerHTML = html + '</ul>' // Fix innerHTML typo
+        } else {
+            el.innerHTML = '' // Clear errors if no validation issues
+        }
+
+        return errors
+    }
+
+    function buy(event) {
+        event.preventDefault() // Prevent default form submission
+
+        // Collect form data
+        let data = {
+            'first_name': document.querySelector('input[name=first_name]').value,
+            'last_name': document.querySelector('input[name=last_name]').value,
+            'email': document.querySelector('input[name=email]').value,
+            'phone': document.querySelector('input[name=phone]').value,
+            'address': document.querySelector('input[name=address]').value,
+            'zip_code': document.querySelector('input[name=zipcode]').value, // Updated name to 'zipcode'
+            'place': document.querySelector('input[name=place]').value,
+        }
+
+        let errors = validateForm(data)
+
+        if (errors.length) {
+            console.log('Errors', errors) // Logs the errors in the console
+        } else {
+            var stripe = Stripe('{{ pub_key }}') // Stripe initialization with public key
+
+            // Send data to the server to start order and get session ID
+            fetch('/order/start_order/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' // Django CSRF protection
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(data) // Send form data as JSON
+            })
+            .then(function(response) {
+                return response.json() // Parse the JSON response
+            })
+            .then(function(session) {
+                // Redirect to Stripe Checkout using session ID
+                return stripe.redirectToCheckout({ sessionId: session.session_id })  // Use the session_id correctly
+            })
+            .then(function(result) {
+                // Handle any errors returned by Stripe
+                if (result.error) {
+                    alert(result.error.message)
+                }
+            })
+            .catch(function(error) {
+                console.log('Error occurred:', error) // Log errors
+            })
+        }
+
+        return false // Prevent form submission
+    }
+</script>
+{% endblock %}

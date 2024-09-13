@@ -1,0 +1,87 @@
+{% extends 'product/base.html' %}
+
+{% load static %}
+
+
+{% block title %}{{ product.title }}{% endblock %}
+
+
+{% block content %}
+<div class="max-w-6xl mt-6 mx-auto flex flex-wrap py-2 px-6 xl:px-0">
+    <div class="images w-full mb-6 lg:mb-0 lg:w-3/5">
+        <img 
+        class="rounded-xl" 
+        src="{% if product.image  %}{{ product.image.url }} {% else %}https://via.placeholder.com/240x240x.jpg {% endif %}" 
+        alt="product_detail">
+    </div>
+
+    <div class="information w-full lg:w-2/5 lg:p-6">
+        <h1 class="text-2xl">{{ product.title }}</h1>
+
+        <p class="mt-1 text-gray-400">$ {{product.price}} </p>
+        
+        {% if product.get_rating > 0 %}
+        <p class="mt-1 text-gray-400">Rating: {{product.get_rating}} / 6 </p>
+        {% endif %}
+
+        <p class="mt-6 text-gray-700">{{ product.description }}</p>
+    
+        <a href=""
+            class="mt-6 inline-block px-8  py-4 rounded-xl bg-purple-500 text-white hover:bg-purple-700"
+            hx-get="{% url 'cart:add_to_cart' product.id %}"
+            hx-target="#menu-cart-button"
+            hx-swap="outterHTML"
+            >Add to cart
+        </a>
+
+        
+    </div>
+
+    <div class="w-full mt-6">
+       <h2 class="text-xl">Reviews</h2> 
+
+       {% if request.user.is_authenticated %}
+            <form method="post" action="." class="mt-6 mb-6 p-6 bg-gray-100 rounded-xl">
+                {% csrf_token %}
+
+                <div>
+                    <label>Rating</label><br>
+                    <select name="rating">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Comment</label><br>
+                    <textarea name="content"></textarea>
+                </div>
+
+                <div class="mt-4">
+                    <button>Submit</button>
+                </div>
+            </form>
+        {% endif %}
+
+
+        {% for review in product.reviews.all %}
+            <div class="px-4 py-6 bg-gray-100 rounded-xl mb-4">
+                <strong>By:</strong> {{ user }} <br>
+                <strong>Rating:</strong> {{ review.rating }}/6<br>
+                <strong>Date:</strong> {{ review.date_created|date:"Y-m-d" }}<br>
+                <strong>Comment:</strong><br>
+                {{ review.content }}
+            </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+
+{% endblock content %}
+
+

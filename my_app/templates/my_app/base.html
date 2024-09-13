@@ -1,0 +1,44 @@
+{% load static %}
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% tailwind_css %}
+    <title>{% block title %}{% endblock %} | MyShop</title>
+    
+</head>
+<body>
+    {% include 'my_app/partials/navbar.html' %}
+
+
+    {% block content %}
+
+    {% endblock content %}
+
+
+    {% include 'my_app/partials/footer.html' %}
+    
+    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+
+    
+    {% block scripts %}
+    <script type="application/javascript" src="https://js.stripe.com/v3/"></script>
+
+    <script>
+        function validateForm(data) {
+
+        }
+
+        function buy() {
+            event.preventDefault()
+
+            return false
+        }
+    </script>
+    {% endblock %}
+    
+</body>
+</html>
